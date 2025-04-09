@@ -1,53 +1,113 @@
 from itertools import batched
 
-inputFile = open("blocks.ppm")
-aList = []
-
-
 '''MODULE 1:
 Setting up the list.
 Each line in the file is seperated into groups of 3 RGB values saved as tuples.'''
 
-for line in inputFile:
-    aList.append(line)
+class PPMimage():
+    def __init__(self, inputFile, exportFile):
+        self.inputFile = open(inputFile)
+        self.exportFile = exportFile
+        self.aList = []
+        self.lengths = []
 
-for i in aList[1:2]:
-    dimensions = i.split()
-    print (dimensions)
+        for line in self.inputFile:
+            self.aList.append(line)
+            self.lengths.append(len(line.split()))
 
-index = 2
-for i in aList[2:]:
-    aList[index] = i.split()
-    index += 1
+        self.num = self.aList[0]
+        for i in self.aList[1:2]:
+            self.dimensions = i.split()
+            print (self.dimensions)
+        
+        index = 2
+        for i in self.aList[2:]:
+            self.aList[index] = i.split()
+            index += 1
+        
+        tempList = []
+        index = 3
+        for line in self.aList[3:]:
+            for group in batched(line, 3):
+                tempList2 = []
+                for item in group:
+                    tempList2.append(item)
+                tempList.append(tempList2)
+            self.aList[index] = tempList
+            tempList = []
+            index += 1
+        
+    '''MODULE 2:
+    Exporting the list'''
 
-tempList = []
-index = 3
-for i in aList[3:]:
-    for j in batched(i, 3):
-        tempList.append(j)
-    aList[index] = tempList
-    tempList = []
-    index += 1
+    def export(self):
 
-'''MODULE 2:
-Exporting the list'''
+        with open(self.exportFile,'w') as file:
+            pass
 
-def export():
-    index = 0
-    exportString = ""
-    for line in aList:
-        for tuple in line:
-            for value in tuple:
-                exportString += value
-                if line in aList[3:]:
-                    exportString += " "
-        if index >= 2:
-            exportString += "\n"
-        index += 1
-    f = open("export.ppm", "r+")
-    f.write(exportString)
+        index = 0
+        self.exportString = ""
+        for line in self.aList:
+            for tuple in line:
+                for value in tuple:
+                    self.exportString += value
+                    if line in self.aList[3:]:
+                        self.exportString += " "
+            if index >= 2:
+                self.exportString += "\n"
+            index += 1
+        f = open(self.exportFile, "r+")
+        f.write(self.exportString)
+       # print(f.read())
+        f.close()
 
-    print(f.read())
-    f.close()
+    '''MODULE 3:
+    Filters'''
 
-export()
+    def negate_red(self):
+        for line in self.aList[3:]:
+            for tuple in line:
+                tempVal = 255 - int(tuple[0])
+                tuple[0] = str(tempVal)
+    
+        print ("negated red successfully.")
+
+    def flip_horizontal(self):
+        tempList = self.aList[:3]
+        self.aList = self.aList[3:]
+        tempList.reverse()
+        for i in tempList:
+            self.aList.append(i)
+        self.aList.reverse()
+
+        print ("flipped horizontally.")
+
+    def gray_scale(self):
+        tempSum = 0
+        for line in self.aList[3:]:
+            for tuple in line:
+                for i in tuple:
+                    tempSum += int(i)
+                tempSum //= 3
+                tuple[0] = str(tempSum)
+                tuple[1] = str(tempSum)
+                tuple[2] = str(tempSum)
+        
+        print ("gray-scaled successfully.")
+
+    def flatten_red(self):
+        for line in self.aList[3:]:
+            for tuple in line:
+                tuple[0] = '0'
+        
+        print ("flattened red successfully")
+
+r = PPMimage("blocks.ppm", "export.ppm")
+
+r.negate_red()
+r.flip_horizontal()
+r.gray_scale()
+r.flatten_red()
+
+
+r.export()
