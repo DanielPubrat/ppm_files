@@ -9,24 +9,29 @@ Each line in the file is seperated into groups of 3 RGB values saved as tuples.'
 class PPMimage():
 
     def set_to_3d_list(self):
-        self.startingNums = self.aList[:3]
         #print(self.startingNums)
+        self.tempstr = self.tempstr[3:]
+        for i in self.tempstr.split(" "):
+            self.aList.append(i)
+        self.startingNums = self.aList[:3]
         self.aList = self.aList[3:]
+
+        self.startingNums.insert(0, "P3")
+        print (self.startingNums)
         #self.aList = numpy.array(self.aList)
        # self.aList = self.aList.reshape(3, int(self.startingNums[1]), int(self.startingNums[2]))
        # self.aList = list(self.aList)
+        '''didnt end up using the numpy stuff'''
         
-        tempList = []
-        index = 0
-        for line in self.aList:
-            for group in batched(line, 3):
-                tempList2 = []
-                for item in group:
-                    tempList2.append(item)
-                tempList.append(tempList2)
-            self.aList[index] = tempList
-            tempList = []
-            index += 1
+        tempList1 = []
+        tempList2 = []
+        for val in batched(self.aList, 3):
+            val = list(val)
+            tempList1.append(val)
+        for val in batched(tempList1, int(self.startingNums[1])):
+            val = list(val)
+            tempList2.append(val)
+        self.aList = tempList2
 
     def __init__(self, inputFile, exportFile):
         self.inputFile = open(inputFile)
@@ -34,14 +39,13 @@ class PPMimage():
         self.aList = []
         self.lengths = []
 
-        lineList = []
+        self.tempstr = ""
         for line in self.inputFile:
-            line = line.strip().split(' ')
-            self.lengths.append(len(line))
+            line = line.strip()
             for val in line:
-                lineList.append(val)
-            self.aList.append(lineList)
-            lineList = []
+                self.tempstr += str(val)
+            self.lengths.append(len(line))
+            self.tempstr += " "
     
         self.lengths = self.lengths[3:]
 
@@ -55,22 +59,16 @@ class PPMimage():
     def export(self):
 
         with open(self.exportFile,'w') as file:
-            pass
-
+            pass #wipes the file before exporting new string
+        
         index = 0
-        length = 0
-        self.exportString = self.startingNums[0][0] + "\n" + self.startingNums[1][0] + " " + self.startingNums[1][1] + "\n" + self.startingNums[2][0] + "\n"
+        self.exportString = self.startingNums[0] + "\n" + self.startingNums[1] + " " + self.startingNums[2] + "\n" + self.startingNums[3] + "\n"
         for line in self.aList:
             for tuple in line:
                 for val in tuple:
                     self.exportString += str(val)
                     self.exportString += " "
-                    length += 1
-                    if length >= self.lengths[index]:
-                        self.exportString += "\n"
-                        length = 0
-                        if index < 144:
-                            index += 1
+                self.exportString += "\n"
         f = open(self.exportFile, "r+")
         f.write(self.exportString)
         print(f.read())
@@ -118,7 +116,7 @@ class PPMimage():
 r = PPMimage("blocks.ppm", "export.ppm")
 
 #r.negate_red()
-#r.flip_horizontal()
+r.flip_horizontal() #I HATE THIS FUNCTION
 #r.gray_scale()
 #r.flatten_red()
 
