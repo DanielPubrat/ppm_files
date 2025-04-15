@@ -17,7 +17,7 @@ class PPMimage():
         self.aList = self.aList[3:]
 
         self.startingNums.insert(0, "P3")
-        print (self.startingNums)
+        #print (self.startingNums)
         #self.aList = numpy.array(self.aList)
        # self.aList = self.aList.reshape(3, int(self.startingNums[1]), int(self.startingNums[2]))
        # self.aList = list(self.aList)
@@ -31,26 +31,20 @@ class PPMimage():
         for val in batched(tempList1, int(self.startingNums[1])):
             val = list(val)
             tempList2.append(val)
-        self.aList = tempList2
+        self.aList = tempList2[:-1]
 
     def __init__(self, inputFile, exportFile):
         self.inputFile = open(inputFile)
         self.exportFile = exportFile
         self.aList = []
-        self.lengths = []
 
         self.tempstr = ""
         for line in self.inputFile:
             line = line.strip()
             for val in line:
                 self.tempstr += str(val)
-            self.lengths.append(len(line))
             self.tempstr += " "
     
-        self.lengths = self.lengths[3:]
-
-       # print (self.lengths)
-
         self.set_to_3d_list()
         
     '''MODULE 2:
@@ -81,14 +75,14 @@ class PPMimage():
     def negate_red(self):
         for line in self.aList:
             for tuple in line:
-                for value in tuple[3:-1:3]:
-                    value = str(255 - int(value))
+                tuple[0] = 255 - int(tuple[0])
     
         print ("negated red successfully.")
 
     def flip_horizontal(self):
 
-        self.aList.reverse()
+        for i in self.aList:
+            i.reverse()
 
         print ("flipped horizontally.")
 
@@ -97,8 +91,8 @@ class PPMimage():
         for line in self.aList:
             for tuple in line:
                 for i in tuple:
-                    for j in i:
-                        tempSum += int(j)
+                    print(i)
+                    tempSum += int(i)
                 tempSum //= 3
                 tuple[0] = str(tempSum)
                 tuple[1] = str(tempSum)
@@ -116,7 +110,7 @@ class PPMimage():
 r = PPMimage("blocks.ppm", "export.ppm")
 
 #r.negate_red()
-r.flip_horizontal() #I HATE THIS FUNCTION
+#r.flip_horizontal()
 #r.gray_scale()
 #r.flatten_red()
 
